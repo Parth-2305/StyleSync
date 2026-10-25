@@ -1,0 +1,54 @@
+{# Global app navigation. Active pill is derived from the current Flask endpoint,
+   so pages don't need to pass anything in. #}
+{% set nav_links = [
+  ("dashboard", "Dashboard", "bi-house"),
+  ("wardrobe", "Wardrobe", "bi-grid"),
+  ("matcher", "Outfit Matcher", "bi-stars"),
+  ("history", "History", "bi-clock-history"),
+  ("hangers", "Hangers", "bi-tags"),
+  ("profile", "Profile", "bi-person"),
+] %}
+<header class="app-nav">
+  <div class="app-nav-inner">
+    <a class="brand" href="{{ url_for('dashboard') }}">
+      <img src="{{ url_for('static', filename='images/logo.png') }}" alt="">
+      <span class="brand-text">
+        <span class="brand-name">StyleSync</span>
+        <span class="brand-tagline">YOUR CLOSET, CLEARER</span>
+      </span>
+    </a>
+
+    <nav class="nav-pills-ss" aria-label="Main">
+      {% for endpoint, label, icon in nav_links %}
+        {% set is_active = request.endpoint == endpoint %}
+        <a class="nav-pill{% if is_active %} is-active{% endif %}"
+           href="{{ url_for(endpoint) }}"
+           {% if is_active %}aria-current="page"{% endif %}>
+          <i class="bi {{ icon }}" aria-hidden="true"></i>{{ label }}
+        </a>
+      {% endfor %}
+    </nav>
+
+    <div class="nav-actions">
+      <button class="btn-coral btn-sm-ss nav-add-btn" type="button" aria-label="Add item" data-bs-toggle="modal" data-bs-target="#addItemModal">
+        <i class="bi bi-plus-lg" aria-hidden="true"></i><span class="nav-add-label">Add item</span>
+      </button>
+      <div class="bell-wrap">
+        <button class="icon-btn" type="button" id="bell-btn" aria-label="Notifications" aria-haspopup="true" aria-expanded="false">
+          <i class="bi bi-bell" aria-hidden="true"></i><span class="bell-badge" id="bell-badge" hidden>0</span>
+        </button>
+        <div class="bell-panel" id="bell-panel" hidden>
+          <div class="bell-head"><strong>Notifications</strong><button class="text-link-btn" type="button" id="bell-read-all">Mark all read</button></div>
+          <ul class="bell-list" id="bell-list"><li class="bell-empty">Loading…</li></ul>
+          <div class="bell-foot" id="bell-foot" hidden>
+            <button class="btn-soft btn-sm-ss" type="button" id="push-btn"><i class="bi bi-phone-vibrate" aria-hidden="true"></i><span id="push-label">Turn on browser notifications</span></button>
+          </div>
+        </div>
+      </div>
+      <a class="avatar-badge" href="{{ url_for('profile') }}" title="{{ user.full_name }}" aria-label="Your profile">{{ user_initial }}</a>
+      <button class="icon-btn" type="button" id="logout-btn" title="Log out" aria-label="Log out">
+        <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>

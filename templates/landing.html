@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block title %}Sign in{% endblock %}
+
+{# The public page has no app nav and no add-item modal. #}
+{% block nav %}{% endblock %}
+{% block modals %}{% endblock %}
+{% block base_scripts %}{% endblock %}
+
+{% block content %}
+<main class="auth-page">
+  <section class="auth-hero fade-up" aria-labelledby="auth-headline">
+    <a class="brand" href="{{ url_for('landing') }}">
+      <img src="{{ url_for('static', filename='images/logo.png') }}" alt="">
+      <span class="brand-text">
+        <span class="brand-name">StyleSync</span>
+        <span class="brand-tagline">YOUR CLOSET, CLEARER</span>
+      </span>
+    </a>
+
+    <div>
+      <h1 class="auth-headline" id="auth-headline">Get dressed without the guesswork.</h1>
+      <p class="auth-hero-copy">
+        Photograph what you own once. StyleSync remembers every piece and suggests outfits
+        from your real closet — matched to the occasion, the season and your taste.
+      </p>
+    </div>
+
+    <ul class="auth-features">
+      <li><i class="bi bi-grid" aria-hidden="true"></i>Digital wardrobe</li>
+      <li><i class="bi bi-stars" aria-hidden="true"></i>Outfit matcher</li>
+      <li><i class="bi bi-clock-history" aria-hidden="true"></i>Wear history</li>
+    </ul>
+
+    <i class="bi bi-bag-heart auth-hero-deco" aria-hidden="true"></i>
+  </section>
+
+  <section class="auth-panel-wrap">
+    <div class="ss-card auth-panel">
+      <div class="auth-tabs" role="tablist" aria-label="Account">
+        <button class="auth-tab" type="button" role="tab" id="tab-login" aria-controls="panel-login" aria-selected="true">Log in</button>
+        <button class="auth-tab" type="button" role="tab" id="tab-signup" aria-controls="panel-signup" aria-selected="false" tabindex="-1">Sign up</button>
+      </div>
+
+            <form class="auth-form" id="panel-login" role="tabpanel" aria-labelledby="tab-login" novalidate
+            data-endpoint="{{ url_for('auth.login') }}">
+        <h2>Welcome back</h2>
+        <p class="text-muted-ss mb-4">Log in to see what's in your closet today.</p>
+
+        <div class="field">
+          <label class="field-label" for="login-email">Email</label>
+          <div class="input-icon-wrap">
+            <i class="bi bi-envelope" aria-hidden="true"></i>
+            <input class="form-input" id="login-email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
+          </div>
+          <p class="field-error" data-error-for="login-email"><i class="bi bi-exclamation-circle"></i>Enter a valid email address.</p>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="login-password">Password</label>
+          <div class="input-icon-wrap">
+            <i class="bi bi-lock" aria-hidden="true"></i>
+            <input class="form-input" id="login-password" name="password" type="password" autocomplete="current-password" placeholder="Your password" required>
+          </div>
+          <p class="field-error" data-error-for="login-password"><i class="bi bi-exclamation-circle"></i>Enter your password.</p>
+        </div>
+
+        <button class="btn-coral btn-block mt-2" type="submit">Log in<i class="bi bi-arrow-right" aria-hidden="true"></i></button>
+        <p class="auth-footnote">New here? <button class="text-link-btn" type="button" data-switch-tab="tab-signup">Create an account</button></p>
+      </form>
+
+      <form class="auth-form" id="panel-signup" role="tabpanel" aria-labelledby="tab-signup" novalidate hidden
+            data-endpoint="{{ url_for('auth.signup') }}">
+        <h2>Create your closet</h2>
+        <p class="text-muted-ss mb-4">It takes under a minute to add your first piece.</p>
+
+        <div class="field">
+          <label class="field-label" for="signup-name">Full name</label>
+          <div class="input-icon-wrap">
+            <i class="bi bi-person" aria-hidden="true"></i>
+            <input class="form-input" id="signup-name" name="full_name" type="text" autocomplete="name" placeholder="Your name" required>
+          </div>
+          <p class="field-error" data-error-for="signup-name"><i class="bi bi-exclamation-circle"></i>Tell us what to call you.</p>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="signup-email">Email</label>
+          <div class="input-icon-wrap">
+            <i class="bi bi-envelope" aria-hidden="true"></i>
+            <input class="form-input" id="signup-email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
+          </div>
+          <p class="field-error" data-error-for="signup-email"><i class="bi bi-exclamation-circle"></i>Enter a valid email address.</p>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="signup-password">Password</label>
+          <div class="input-icon-wrap">
+            <i class="bi bi-lock" aria-hidden="true"></i>
+            <input class="form-input" id="signup-password" name="password" type="password" autocomplete="new-password" placeholder="8+ characters, a letter and a number" minlength="8" required>
+          </div>
+          <p class="field-error" data-error-for="signup-password"><i class="bi bi-exclamation-circle"></i>Use 8+ characters with a letter and a number.</p>
+        </div>
+
+        <button class="btn-coral btn-block mt-2" type="submit">Create account<i class="bi bi-arrow-right" aria-hidden="true"></i></button>
+        <p class="auth-footnote">Already have an account? <button class="text-link-btn" type="button" data-switch-tab="tab-login">Log in</button></p>
+      </form>
+    </div>
+  </section>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/landing.js') }}"></script>
+{% endblock %}

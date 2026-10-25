@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% from "includes/macros.html" import empty_state with context %}
+{% block title %}History{% endblock %}
+
+{# One card per logged look. Saved looks get a "Remove from saved" button. #}
+{% macro history_card(entry) %}
+<article class="ss-card history-card" data-log-id="{{ entry.id }}">
+  <div class="history-date">
+    <strong>{{ entry.day }}</strong>
+    <span>{{ entry.weekday }}</span>
+  </div>
+  <div>
+    <h3>{{ (entry.occasion ~ " look") if entry.occasion else "Hanger look" }} · {{ entry.label }}</h3>
+    <p class="text-muted-ss small mb-2">{{ entry["items"] | map(attribute='name') | join(" + ") }}</p>
+    <div class="pill-row">
+      {% if entry.season %}<span class="tag">{{ entry.season }}</span>{% endif %}
+      {% if entry.source == "hanger_scan" %}<span class="tag"><i class="bi bi-tags" aria-hidden="true"></i> From hanger scans</span>{% endif %}
+      <span class="tag tag--coral">{{ "Saved" if entry.source == "saved" else "Worn" }}</span>
+    </div>
+    {% if entry.source == "saved" %}
+      <button class="btn-ghost btn-sm-ss btn-remove" type="button" data-remove="{{ entry.id }}">
+        <i class="bi bi-bookmark-x" aria-hidden="true"></i>Remove from saved
+      </button>
+    {% endif %}
+  </div>
+  <div class="thumb-row">
+    {% for item in entry["items"] %}
+      {% if item.image_url %}<img src="{{ item.image_url }}" alt="{{ item.name }}" loading="lazy">{% endif %}
+    {% endfor %}
+  </div>
+</article>
+{% endmacro %}
+
+{% block content %}
+<main class="page" id="history-page" data-start-tab="{{ tab }}">
+  <header class="page-header fade-up">
+    <div>
+      <span class="eyebrow">Outfit history</span>
+      <h1 class="page-title">What you wore, and what you loved.</h1>
+      <p class="page-subtitle">Worn looks help the matcher avoid repeating yesterday's outfit. Saved looks are ideas to come back to.</p>
+    </div>
+    <a class="btn-coral" href="{{ url_for('matcher') }}"><i class="bi bi-stars" aria-hidden="true"></i>Match a new look</a>
+  </header>
+
+  <div class="pill-row history-tabs" role="group" aria-label="History type" id="history-tabs">
+    <button class="pill" type="button" data-filter="worn" aria-pressed="false">
+      Worn <span class="count" id="count-worn">{{ worn | length }}</span>
+    </button>
+    <button class="pill" type="button" data-filter="saved" aria-pressed="false">
+      Saved <span class="count" id="count-saved">{{ saved | length }}</span>
+    </button>
+  </div>
+
+  {% for name, entries, icon, title, text in [
+    ("worn", worn, "bi-clock-history", "No worn outfits yet", "Hit \"Wear this today\" on a look in the Outfit Matcher and it will appear here."),
+    ("saved", saved, "bi-bookmark-heart", "No saved looks yet", "Hit \"Save look\" on a look you like in the Outfit Matcher and it will appear here."),
+  ] %}
+    <div class="history-list" id="list-{{ name }}" hidden>
+      {% for entry in entries %}{{ history_card(entry) }}{% endfor %}
+    </div>
+    <div class="ss-card history-empty" id="empty-{{ name }}" hidden>
+      {% call empty_state(icon, title, text) %}
+        <a class="btn-coral" href="{{ url_for('matcher') }}">Open the Outfit Matcher</a>
+      {% endcall %}
+    </div>
+  {% endfor %}
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/history.js') }}"></script>
+{% endblock %}

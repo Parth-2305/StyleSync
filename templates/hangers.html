@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% from "includes/macros.html" import empty_state with context %}
+{% block title %}Hangers{% endblock %}
+
+{% block content %}
+<main class="page" id="hangers-page" data-state="{{ state }}">
+  <header class="page-header fade-up">
+    <div>
+      <span class="eyebrow">Smart hangers</span> <span class="live-pill" title="This page updates by itself when a tag is scanned"><span class="live-dot" aria-hidden="true"></span>Live</span>
+      <h1 class="page-title">Your wardrobe, connected.</h1>
+      <p class="page-subtitle">Tag a hanger, take the garment off the rail, and StyleSync logs it as worn and tells you. No typing, no tapping.</p>
+    </div>
+  </header>
+
+  {# ------------------------------------------------------------ 1. readers #}
+  <section class="ss-card hanger-section" aria-labelledby="h-readers">
+    <h2 id="h-readers"><span class="step-num">1</span>Your readers</h2>
+    <p class="text-muted-ss">A reader is the ESP32 with the RFID module. Pairing creates a secret key that only that reader will use.</p>
+    {% if devices %}
+      <ul class="row-list">
+        {% for d in devices %}
+          <li>
+            <i class="bi bi-router" aria-hidden="true"></i>
+            <div><strong>{{ d.name }}</strong><span class="text-muted-ss small">Last heard from: {{ d.last_seen_at | ago }}</span></div>
+            <button class="btn-ghost btn-sm-ss" type="button" data-remove-device="{{ d.id }}">Remove</button>
+          </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+    <form class="inline-form" id="add-device-form" novalidate>
+      <input class="form-input" id="device-name" name="name" type="text" maxlength="40" placeholder="Name this reader, e.g. Bedroom wardrobe" autocomplete="off" aria-label="Reader name">
+      <button class="btn-coral btn-sm-ss" type="submit"><i class="bi bi-plus-lg" aria-hidden="true"></i>Pair a reader</button>
+    </form>
+    <div class="key-reveal" id="key-reveal" hidden>
+      <strong><i class="bi bi-key" aria-hidden="true"></i> Copy this key now. It is shown only once.</strong>
+      <code id="key-value"></code>
+      <div class="d-flex gap-2 mt-2">
+        <button class="btn-soft btn-sm-ss" type="button" id="key-copy"><i class="bi bi-clipboard" aria-hidden="true"></i>Copy</button>
+        <button class="btn-ghost btn-sm-ss" type="button" id="key-done">I have saved it</button>
+      </div>
+    </div>
+  </section>
+
+  {# ------------------------------------------------------------ 2. link tags #}
+  <section class="ss-card hanger-section" aria-labelledby="h-link">
+    <h2 id="h-link"><span class="step-num">2</span>Link tags to your clothes</h2>
+    <p class="text-muted-ss">Hold a new tag to the reader once. It shows up here, and you choose which piece it belongs to.</p>
+    {% if pending %}
+      <ul class="row-list">
+        {% for t in pending %}
+          <li>
+            <i class="bi bi-upc-scan" aria-hidden="true"></i>
+            <div><strong class="mono">{{ t.tag_uid }}</strong><span class="text-muted-ss small">Scanned {{ t.last_scanned_at | ago }}</span></div>
+            <select class="form-select-ss link-select" aria-label="Piece for tag {{ t.tag_uid }}">
+              <option value="">Choose a piece…</option>
+              {% for p in free_pieces %}<option value="{{ p.id }}">{{ p.name }}</option>{% endfor %}
+            </select>
+            <button class="btn-coral btn-sm-ss" type="button" data-link="{{ t.tag_uid }}">Link</button>
+            <button class="btn-ghost btn-sm-ss" type="button" data-forget="{{ t.tag_uid }}" aria-label="Forget tag {{ t.tag_uid }}"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="empty-hint"><i class="bi bi-info-circle" aria-hidden="true"></i>No new tags waiting. Scan one, or type a tag id below.</p>
+    {% endif %}
+    <form class="inline-form" id="manual-link-form" novalidate>
+      <input class="form-input mono" id="manual-tag" type="text" maxlength="30" placeholder="Or type a tag id, e.g. 04A1B2C3" autocomplete="off" aria-label="Tag id">
+      <select class="form-select-ss" id="manual-item" aria-label="Piece">
+        <option value="">Choose a piece…</option>
+        {% for p in free_pieces %}<option value="{{ p.id }}">{{ p.name }}</option>{% endfor %}
+      </select>
+      <button class="btn-soft btn-sm-ss" type="submit">Link tag</button>
+    </form>
+  </section>
+
+  {# ------------------------------------------------------------ 3. linked tags #}
+  <section class="ss-card hanger-section" aria-labelledby="h-linked">
+    <h2 id="h-linked"><span class="step-num">3</span>Tagged pieces <span class="count-pill">{{ linked | length }}</span></h2>
+    {% if linked %}
+      <ul class="row-list">
+        {% for t in linked %}
+          <li>
+            {% if t.item.image_url %}<img class="thumb" src="{{ t.item.image_url }}" alt="{{ t.item.name }}" loading="lazy">{% else %}<span class="thumb thumb-empty"><i class="bi bi-image" aria-hidden="true"></i></span>{% endif %}
+            <div><strong>{{ t.item.name }}</strong><span class="text-muted-ss small"><span class="mono">{{ t.tag_uid }}</span> · last scanned {{ t.last_scanned_at | ago }}</span></div>
+            <button class="btn-ghost btn-sm-ss" type="button" data-simulate="{{ t.tag_uid }}">Simulate scan</button>
+            <button class="btn-ghost btn-sm-ss" type="button" data-forget="{{ t.tag_uid }}">Unlink</button>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      {{ empty_state("bi-tags", "No tagged pieces yet", "Link a tag in step 2 and it will appear here.") }}
+    {% endif %}
+  </section>
+
+  {# ------------------------------------------------------------ 4. try without hardware #}
+  <section class="ss-card hanger-section" aria-labelledby="h-try">
+    <h2 id="h-try"><span class="step-num">4</span>Try it without hardware</h2>
+    <p class="text-muted-ss">This runs exactly the code a real reader uses. Type any tag id (a tag that is not linked yet becomes a new waiting tag), or use <b>Simulate scan</b> on a tagged piece above.</p>
+    <form class="inline-form" id="simulate-form" novalidate>
+      <input class="form-input mono" id="simulate-tag" type="text" maxlength="30" placeholder="Tag id, e.g. 04A1B2C3" autocomplete="off" aria-label="Tag id to simulate">
+      <button class="btn-coral btn-sm-ss" type="submit"><i class="bi bi-broadcast" aria-hidden="true"></i>Simulate scan</button>
+    </form>
+  </section>
+
+  {# ------------------------------------------------------------ activity #}
+  {% if activity %}
+  <section class="ss-card hanger-section" aria-labelledby="h-activity">
+    <h2 id="h-activity">Recent hanger activity</h2>
+    <ul class="row-list">
+      {% for a in activity %}
+        <li><i class="bi {{ 'bi-check2-circle' if a.kind == 'scan' else 'bi-question-circle' }}" aria-hidden="true"></i>
+          <div><strong>{{ a.message }}</strong><span class="text-muted-ss small">{{ a.created_at | ago }}</span></div></li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+
+  {# ------------------------------------------------------------ ESP32 setup #}
+  <section class="ss-card hanger-section" aria-labelledby="h-setup">
+    <h2 id="h-setup">Connect the ESP32</h2>
+    <ol class="setup-steps">
+      <li>Wire the RC522 to the ESP32 and flash <span class="mono">firmware/rfid_scanner/rfid_scanner.ino</span> (see <span class="mono">firmware/README.md</span>).</li>
+      <li>In the sketch, set your Wi-Fi name and password, and the key from step 1.</li>
+      <li>Set the server address to your computer's address on the home network (not "localhost"):</li>
+    </ol>
+    <pre class="code-box">const char* SERVER_URL = "http://<b>YOUR-COMPUTER-IP</b>:5000/api/iot/scan";</pre>
+    <p class="text-muted-ss small">Find your computer's address with <span class="mono">ipconfig</span>. Start the site with <span class="mono">set HOST=0.0.0.0</span> first so the ESP32 can reach it.</p>
+    <p class="text-muted-ss small">Browser notifications: {{ "ready. Use the bell at the top right to turn them on." if push_enabled else "not configured (VAPID keys missing in .env)." }}</p>
+  </section>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/hangers.js') }}"></script>
+{% endblock %}

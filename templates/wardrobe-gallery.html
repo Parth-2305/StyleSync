@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% from "includes/macros.html" import item_card, empty_state with context %}
+{% block title %}Wardrobe{% endblock %}
+
+{% block content %}
+<main class="page">
+  <header class="page-header fade-up">
+    <div>
+      <span class="eyebrow">Your wardrobe</span>
+      <h1 class="page-title">Every piece, in one place.</h1>
+      <p class="page-subtitle">Filter by category or search by name, colour or style.</p>
+    </div>
+    <button class="btn-coral" type="button" data-bs-toggle="modal" data-bs-target="#addItemModal">
+      <i class="bi bi-plus-lg" aria-hidden="true"></i>Add New Piece
+    </button>
+  </header>
+
+  <div class="filter-bar">
+    <div class="pill-row" role="group" aria-label="Filter by category" id="category-pills">
+      <button class="pill is-active" type="button" data-filter="all" aria-pressed="true">
+        All <span class="count" data-count-for="all">{{ items | length }}</span>
+      </button>
+      {% for value, label in category_labels.items() %}
+        <button class="pill" type="button" data-filter="{{ value }}" aria-pressed="false">
+          {{ label }} <span class="count" data-count-for="{{ value }}">{{ items | selectattr('category', 'equalto', value) | list | length }}</span>
+        </button>
+      {% endfor %}
+    </div>
+    <div class="input-icon-wrap">
+      <i class="bi bi-search" aria-hidden="true"></i>
+      <input class="form-input" type="search" id="wardrobe-search" placeholder="Search pieces…" aria-label="Search pieces">
+    </div>
+  </div>
+
+  <p class="result-count" id="result-count" aria-live="polite">Showing {{ items | length }} pieces</p>
+
+  <div class="item-grid" id="item-grid">
+    {% for item in items %}
+      {{ item_card(item) }}
+    {% endfor %}
+  </div>
+
+  {% if not items %}
+    <div class="ss-card">
+      {% call empty_state("bi-bag-plus", "Your closet is empty", "Add your first piece with a photo and it will show up here.") %}
+        <button class="btn-coral" type="button" data-bs-toggle="modal" data-bs-target="#addItemModal">Add your first piece</button>
+      {% endcall %}
+    </div>
+  {% endif %}
+
+  <div class="ss-card mt-2" id="wardrobe-empty" hidden>
+    {% call empty_state("bi-search", "Nothing matches that yet", "Try another category or clear the search to see the rest of your closet.") %}
+      <button class="btn-ghost" type="button" id="clear-filters">Clear filters</button>
+    {% endcall %}
+  </div>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/wardrobe-gallery.js') }}"></script>
+{% endblock %}

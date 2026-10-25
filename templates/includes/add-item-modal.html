@@ -1,0 +1,119 @@
+{# "Add New Piece" modal — included on every app page so the nav's "+ Add item" works anywhere.
+   Behaviour lives in static/js/add-item-modal.js.
+   BACKEND TODO: submit as multipart/form-data to POST /api/items (ARCHITECTURE.md §4.3). #}
+<div class="modal fade ss-modal" id="addItemModal" tabindex="-1" aria-labelledby="addItemModalTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+    <form class="modal-content" id="add-item-form" novalidate>
+      <div class="modal-header">
+        <div>
+          <span class="eyebrow">New in your closet</span>
+          <h2 class="modal-title" id="addItemModalTitle">Add New Piece</h2>
+          <p class="modal-subtitle">A clear photo and a few tags is all the matcher needs.</p>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="add-item-layout">
+          <div>
+            <span class="field-label" id="item-photo-label">Photo <span class="optional">(optional)</span></span>
+            <div class="dropzone" id="item-dropzone" role="button" tabindex="0" aria-labelledby="item-photo-label">
+              <input type="file" id="item-photo" name="image" accept="image/jpeg,image/png,image/webp" hidden>
+              <i class="bi bi-cloud-arrow-up" aria-hidden="true"></i>
+              <strong>Drop a photo here</strong>
+              <small>or click to browse · JPG, PNG, WebP · max 5&nbsp;MB</small>
+              <img class="dropzone-preview" id="item-photo-preview" alt="Selected garment preview" hidden>
+            </div>
+            <button class="btn-ghost btn-sm-ss mt-2 w-100" type="button" id="item-photo-clear" hidden>
+              <i class="bi bi-x-lg" aria-hidden="true"></i>Remove photo
+            </button>
+          </div>
+
+          <div>
+            <div class="field">
+              <label class="field-label" for="item-name">Item name</label>
+              <input class="form-input" id="item-name" name="name" type="text" maxlength="60" placeholder="e.g. Navy Oxford Shirt" autocomplete="off" required>
+              <p class="field-error" data-error-for="item-name"><i class="bi bi-exclamation-circle"></i>Give this piece a name.</p>
+            </div>
+
+            <div class="field-row">
+              <div class="field">
+                <label class="field-label" for="item-category">Category</label>
+                <select class="form-select-ss" id="item-category" name="category" required>
+                  <option value="">Choose…</option>
+                  {% for value, label in category_labels.items() %}
+                    <option value="{{ value }}">{{ label }}</option>
+                  {% endfor %}
+                </select>
+                <p class="field-error" data-error-for="item-category"><i class="bi bi-exclamation-circle"></i>Pick a category.</p>
+              </div>
+              <div class="field">
+                <label class="field-label" for="item-color">Color</label>
+                <select class="form-select-ss" id="item-color" name="color" data-other="item-color-other" required>
+                  <option value="">Choose…</option>
+                  {% for color in colors %}
+                    <option value="{{ color.name }}">{{ color.name }}</option>
+                  {% endfor %}
+                  <option value="__other">Other…</option>
+                </select>
+                <p class="field-error" data-error-for="item-color"><i class="bi bi-exclamation-circle"></i>Pick a colour.</p>
+                <input class="form-input other-input mt-2" id="item-color-other" name="color_other" type="text" maxlength="30" placeholder="Type your colour" autocomplete="off" hidden>
+                <p class="field-error" data-error-for="item-color-other"><i class="bi bi-exclamation-circle"></i>Type your colour.</p>
+              </div>
+            </div>
+
+            <div class="field-row">
+              <div class="field">
+                <label class="field-label" for="item-season">Season</label>
+                <select class="form-select-ss" id="item-season" name="season" required>
+                  <option value="">Choose…</option>
+                  {% for season in seasons %}
+                    <option value="{{ season }}">{{ season }}</option>
+                  {% endfor %}
+                </select>
+                <p class="field-error" data-error-for="item-season"><i class="bi bi-exclamation-circle"></i>Pick a season.</p>
+              </div>
+              <div class="field">
+                <label class="field-label" for="item-occasion">Occasion</label>
+                <select class="form-select-ss" id="item-occasion" name="occasion" data-other="item-occasion-other" required>
+                  <option value="">Choose…</option>
+                  {% for occasion in occasions %}
+                    <option value="{{ occasion }}">{{ occasion }}</option>
+                  {% endfor %}
+                  <option value="__other">Other…</option>
+                </select>
+                <p class="field-error" data-error-for="item-occasion"><i class="bi bi-exclamation-circle"></i>Pick an occasion.</p>
+                <input class="form-input other-input mt-2" id="item-occasion-other" name="occasion_other" type="text" maxlength="30" placeholder="Type your occasion" autocomplete="off" hidden>
+                <p class="field-error" data-error-for="item-occasion-other"><i class="bi bi-exclamation-circle"></i>Type your occasion.</p>
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="field-label" for="item-style">Style</label>
+              <select class="form-select-ss" id="item-style" name="style" data-other="item-style-other">
+                {% for style in styles %}
+                  <option value="{{ style }}">{{ style }}</option>
+                {% endfor %}
+                <option value="__other">Other…</option>
+              </select>
+              <input class="form-input other-input mt-2" id="item-style-other" name="style_other" type="text" maxlength="30" placeholder="Type your style" autocomplete="off" hidden>
+              <p class="field-error" data-error-for="item-style-other"><i class="bi bi-exclamation-circle"></i>Type your style.</p>
+            </div>
+
+            <div class="field mb-0">
+              <label class="field-label" for="item-notes">Notes <span class="optional">(optional)</span></label>
+              <textarea class="form-textarea" id="item-notes" name="notes" maxlength="280" placeholder="Fit, fabric, where you bought it…"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-ghost" type="button" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn-coral" type="submit" id="add-item-submit">
+          <i class="bi bi-plus-lg" aria-hidden="true"></i>Add to closet
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

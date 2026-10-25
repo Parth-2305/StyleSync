@@ -1,0 +1,43 @@
+{# Reusable markup. Import with:  {% from "includes/macros.html" import item_card with context %}
+   The Outfit Matcher draws its cards in JS (app.js → renderItemCard); this macro is the gallery version. #}
+
+{% macro item_card(item) %}
+<article class="item-card" data-category="{{ item.category }}" data-search="{{ (item.name ~ ' ' ~ item.color ~ ' ' ~ item.style)|lower }}">
+  <div class="item-photo">
+    {% if item.image_url %}
+      <img src="{{ item.image_url }}" alt="{{ item.color }} {{ item.name }}" loading="lazy">
+    {% else %}
+      <div class="item-photo-empty"><i class="bi bi-image" aria-hidden="true"></i></div>
+    {% endif %}
+    <span class="tag">{{ category_labels[item.category] }}</span>
+    <button class="item-delete" type="button" data-id="{{ item.id }}" aria-label="Delete {{ item.name }}">
+      <i class="bi bi-trash3" aria-hidden="true"></i>
+    </button>
+  </div>
+  <div class="item-body">
+    <h3>{{ item.name }}</h3>
+    <div class="item-meta">
+      <span class="d-inline-flex align-items-center gap-1">
+        <span class="swatch" style="background: {{ color_hex(item.color) }}"></span>{{ item.color }}
+      </span>
+      <span class="dot"></span><span>{{ item.season | join(", ") }}</span>
+      <span class="dot"></span><span>{{ item.style }}</span>
+    </div>
+    <p class="wear-line"><i class="bi bi-arrow-repeat" aria-hidden="true"></i>{% if item.wear_count %}Worn {{ item.wear_count }} time{{ 's' if item.wear_count != 1 }}{% if item.last_worn_at %} · last {{ item.last_worn_at | ago }}{% endif %}{% else %}Never worn yet{% endif %}</p>
+    {% if item.id in (tagged_ids | default([])) %}
+      <p class="tag-status is-tagged"><span class="status-dot" aria-hidden="true"></span><i class="bi bi-tags" aria-hidden="true"></i>Hanger tag assigned</p>
+    {% else %}
+      <p class="tag-status"><span class="status-dot" aria-hidden="true"></span>No hanger tag</p>
+    {% endif %}
+  </div>
+</article>
+{% endmacro %}
+
+{% macro empty_state(icon, title, text) %}
+<div class="empty-state">
+  <span class="empty-icon"><i class="bi {{ icon }}" aria-hidden="true"></i></span>
+  <h3>{{ title }}</h3>
+  <p>{{ text }}</p>
+  {{ caller() if caller }}
+</div>
+{% endmacro %}

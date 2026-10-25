@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<main class="page">
+  <header class="page-header fade-up">
+    <div>
+      <span class="eyebrow">Profile</span>
+      <h1 class="page-title">Your style, in your words.</h1>
+      <p class="page-subtitle">These preferences nudge the Outfit Matcher toward looks that feel like you.</p>
+    </div>
+  </header>
+
+  <div class="profile-layout">
+    <aside class="ss-card profile-id">
+      <span class="avatar-badge avatar-badge--lg">{{ user_initial }}</span>
+      <h2>{{ user.full_name }}</h2>
+      <p>{{ user.email }}</p>
+      <form id="profile-details" novalidate>
+        <div class="field text-start">
+          <label class="field-label" for="profile-name">Display name <span class="optional">(editable once accounts go live)</span></label>
+          <input class="form-input" id="profile-name" name="full_name" type="text" value="{{ user.full_name }}" readonly>
+        </div>
+        <div class="field text-start mb-0">
+          <label class="field-label" for="profile-city">City <span class="optional">(for weather, Phase 2)</span></label>
+          <input class="form-input" id="profile-city" name="city" type="text" placeholder="e.g. Mumbai" autocomplete="address-level2">
+        </div>
+      </form>
+    </aside>
+
+    <section class="ss-card">
+      <div class="profile-section">
+        <h2>Visual vocabulary</h2>
+        <p>Pick every style that sounds like you. Choose as many as you like.</p>
+        <div class="pill-row" role="group" aria-label="Preferred styles" id="style-chips">
+          {% for style in styles %}
+            <button class="chip" type="button" data-value="{{ style }}" aria-pressed="false">{{ style }}</button>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="profile-section">
+        <h2>Colours you reach for</h2>
+        <p>We'll favour these when two pieces are an equally good match.</p>
+        <div class="pill-row" role="group" aria-label="Preferred colours" id="color-chips">
+          {% for color in colors %}
+            <button class="chip color-chip" type="button" data-value="{{ color.name }}" aria-pressed="false">
+              <span class="swatch" style="background: {{ color.hex }}"></span>{{ color.name }}
+            </button>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="profile-save-bar">
+        <button class="btn-ghost" type="button" id="profile-reset">Reset</button>
+        {# BACKEND TODO: persist to the `profiles` table once auth exists; localStorage for now. #}
+        <button class="btn-coral" type="button" id="profile-save"><i class="bi bi-check2" aria-hidden="true"></i>Save preferences</button>
+      </div>
+    </section>
+  </div>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/profile.js') }}"></script>
+{% endblock %}

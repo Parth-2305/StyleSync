@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}{{ status }}{% endblock %}
+{% block nav %}{% endblock %}
+{% block modals %}{% endblock %}
+{% block base_scripts %}{% endblock %}
+{% block content %}
+<main class="auth-page" style="grid-template-columns:1fr">
+  <div class="empty-state" style="margin:auto">
+    <span class="empty-icon"><i class="bi bi-emoji-frown" aria-hidden="true"></i></span>
+    <h3>{{ message }}</h3>
+    <a class="btn-coral" href="{{ url_for('landing') }}">Back to StyleSync</a>
+  </div>
+</main>
+{% endblock %}

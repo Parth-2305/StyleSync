@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% from "includes/macros.html" import empty_state with context %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<main class="page" id="dashboard-page">
+  <section class="dash-hero fade-up">
+    <div class="ss-card greeting-card">
+      <span class="greeting-date" id="greeting-date"></span>
+      <h1 class="page-title">{{ greeting }}, {{ user_first_name }}.</h1>
+      <p class="page-subtitle">Your closet is ready when you are. Let the matcher pull a look together, or add something new.</p>
+    </div>
+
+    <a class="wear-cta" href="{{ url_for('matcher') }}">
+      <div>
+        <span class="eyebrow">Today's pick</span>
+        <h2>What should I wear?</h2>
+        <p>Choose an occasion and a season — we'll build an outfit from pieces you already own.</p>
+      </div>
+      <div class="wear-cta-footer">
+        <span class="fw-semibold">Open the Outfit Matcher</span>
+        <span class="wear-cta-arrow"><i class="bi bi-arrow-right" aria-hidden="true"></i></span>
+      </div>
+    </a>
+  </section>
+
+  <section class="stat-grid" aria-label="Closet stats">
+    {# Each card is a link to the page it counts. #}
+    <a class="ss-card stat-card stat-link" href="{{ url_for('wardrobe') }}">
+      <span class="stat-icon"><i class="bi bi-bag" aria-hidden="true"></i></span>
+      <div>
+        <span class="stat-value">{{ stats.pieces }}</span>
+        <span class="stat-label">Pieces in closet</span>
+      </div>
+      <i class="bi bi-arrow-right stat-arrow" aria-hidden="true"></i>
+    </a>
+    <a class="ss-card stat-card stat-link" href="{{ url_for('wardrobe') }}#category-pills">
+      <span class="stat-icon stat-icon--sky"><i class="bi bi-grid-3x3-gap" aria-hidden="true"></i></span>
+      <div>
+        <span class="stat-value">{{ stats.categories_covered }}<small> / {{ stats.categories_total }}</small></span>
+        <span class="stat-label">Categories covered</span>
+      </div>
+      <i class="bi bi-arrow-right stat-arrow" aria-hidden="true"></i>
+    </a>
+    <a class="ss-card stat-card stat-link" href="{{ url_for('history', tab='saved') }}">
+      <span class="stat-icon"><i class="bi bi-bookmark-heart" aria-hidden="true"></i></span>
+      <div>
+        <span class="stat-value">{{ stats.saved_looks }}</span>
+        <span class="stat-label">Saved looks</span>
+      </div>
+      <i class="bi bi-arrow-right stat-arrow" aria-hidden="true"></i>
+    </a>
+  </section>
+
+  <section class="dash-bottom">
+    <div class="ss-card">
+      <div class="card-title-row">
+        <h2>A peek inside</h2>
+        <a class="link-arrow" href="{{ url_for('wardrobe') }}">See all pieces <i class="bi bi-arrow-right"></i></a>
+      </div>
+      <div class="peek-grid" id="peek-grid">
+        {% for item in latest_items %}
+          <a class="peek-item" href="{{ url_for('wardrobe') }}">
+            <div class="peek-photo">
+              {% if item.image_url %}<img src="{{ item.image_url }}" alt="{{ item.color }} {{ item.name }}" loading="lazy">
+              {% else %}<div class="item-photo-empty"><i class="bi bi-image" aria-hidden="true"></i></div>{% endif %}
+            </div>
+            <strong>{{ item.name }}</strong>
+            <span>{{ category_labels[item.category] }}</span>
+          </a>
+        {% else %}
+          {{ empty_state("bi-bag-plus", "Nothing here yet", "Use Add item (top right) to add your first piece.") }}
+        {% endfor %}
+      </div>
+    </div>
+
+    <aside class="ss-card note-card">
+      <i class="bi bi-quote" aria-hidden="true"></i>
+      <div>
+        <span class="eyebrow">Style note</span>
+        <blockquote>{{ style_note }}</blockquote>
+      </div>
+      <a class="btn-soft btn-sm-ss align-self-start mt-auto" href="{{ url_for('profile') }}">
+        <i class="bi bi-sliders" aria-hidden="true"></i>Tune your style
+      </a>
+    </aside>
+  </section>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Outfit Matcher{% endblock %}
+
+
+{% block content %}
+{% set option_groups = [
+  ("occasion", "Occasion", "bi-calendar-event", occasions),
+  ("season", "Season", "bi-cloud-sun", seasons),
+  ("style", "Style", "bi-palette", styles),
+  ("color", "Colour mood", "bi-droplet-half", color_moods),
+] %}
+<main class="page">
+  <header class="page-header fade-up">
+    <div>
+      <span class="eyebrow">Outfit Matcher</span>
+      <h1 class="page-title">Tell us the plan. We'll pull the look.</h1>
+      <p class="page-subtitle">Every suggestion is built only from pieces already in your wardrobe.</p>
+    </div>
+  </header>
+
+  <div class="matcher-layout">
+    <aside class="ss-card option-panel" aria-label="Outfit options">
+      {% for key, label, icon, values in option_groups %}
+        <div class="option-group">
+          <h3 id="group-{{ key }}"><i class="bi {{ icon }}" aria-hidden="true"></i>{{ label }}
+            {% if key in ("style", "color") %}<span class="text-muted-ss fw-normal small">(optional)</span>{% endif %}
+          </h3>
+          <div class="pill-row" role="group" aria-labelledby="group-{{ key }}" data-option="{{ key }}">
+            {% for value in values %}
+              <button class="pill" type="button" data-value="{{ value }}" aria-pressed="false">{{ value }}</button>
+            {% endfor %}
+          </div>
+        </div>
+      {% endfor %}
+
+      <div class="option-actions">
+        <button class="btn-coral btn-block" type="button" id="match-btn">
+          <i class="bi bi-stars" aria-hidden="true"></i>Match my outfit
+        </button>
+        <button class="btn-ghost btn-block" type="button" id="reset-btn">Reset choices</button>
+      </div>
+    </aside>
+
+    <section class="ss-card canvas-panel" aria-live="polite">
+      <div class="canvas-empty" id="canvas-empty">
+        <div class="canvas-hangers" aria-hidden="true">
+          <i class="bi bi-handbag"></i><i class="bi bi-stars"></i><i class="bi bi-bag-heart"></i>
+        </div>
+        <h2>Your next favourite outfit starts here</h2>
+        <p>Pick an occasion and a season on the left, then hit <strong>Match my outfit</strong>.</p>
+      </div>
+
+      <div class="outfit-result" id="outfit-result" hidden>
+        <div class="card-title-row">
+          <h2 id="outfit-title">Your look</h2>
+          <span class="tag tag--coral" id="outfit-score"></span>
+        </div>
+        <div class="outfit-reason"><i class="bi bi-lightbulb" aria-hidden="true"></i><ul id="outfit-reasons"></ul></div>
+        <div class="outfit-grid" id="outfit-grid"></div>
+        <div class="outfit-actions">
+          <button class="btn-coral" type="button" id="wear-btn"><i class="bi bi-check2-circle" aria-hidden="true"></i>Wear this today</button>
+          <button class="btn-soft" type="button" id="save-btn"><i class="bi bi-bookmark-heart" aria-hidden="true"></i>Save look</button>
+          <button class="btn-ghost" type="button" id="shuffle-btn"><i class="bi bi-shuffle" aria-hidden="true"></i>Shuffle</button>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/sparkles.js') }}"></script>
+<script src="{{ url_for('static', filename='js/outfit-matcher.js') }}"></script>
+{% endblock %}

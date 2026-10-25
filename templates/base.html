@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>{% block title %}StyleSync{% endblock %} · StyleSync</title>
+  <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" sizes="any">
+  <link rel="icon" href="{{ url_for('static', filename='images/favicon.png') }}" type="image/png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+  {# integrity="..." = the browser refuses the file if even one byte differs from the version we tested (CDN tamper protection) #}
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" rel="stylesheet"
+        integrity="sha384-CK2SzKma4jA5H/MXDUU7i1TqZlCFaD4T01vtyDFvPlD97JQyS+IsSh1nI2EFbpyk" crossorigin="anonymous">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="{% block body_class %}{% endblock %}">
+  {% block nav %}{% include "includes/nav.html" %}{% endblock %}
+
+  {% block content %}{% endblock %}
+
+  {% block modals %}{% include "includes/add-item-modal.html" %}{% endblock %}
+
+  {# Shared lookup data for page scripts, so JS never hardcodes what Flask already knows. #}
+  <script nonce="{{ csp_nonce }}">
+    window.STYLESYNC = {
+      categoryLabels: {{ category_labels | tojson }},
+      colors: {{ colors | tojson }},
+      urls: {
+        wardrobe: "{{ url_for('wardrobe') }}",
+        history: "{{ url_for('history') }}"
+      }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+  <script src="{{ url_for('static', filename='js/toast.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  {% if session.get("user_id") %}<script src="{{ url_for('static', filename='js/notifications.js') }}"></script>{% endif %}
+  {% block base_scripts %}<script src="{{ url_for('static', filename='js/add-item-modal.js') }}"></script>{% endblock %}
+  {% block scripts %}{% endblock %}
+</body>
+</html>
